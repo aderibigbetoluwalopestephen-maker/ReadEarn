@@ -18,14 +18,14 @@ const navItems = [
 ];
 const money = n => '₦' + Number(n || 0).toLocaleString('en-NG');
 
-export default function MemberDashboard({ onLogout }) {
+export default function MemberDashboard({ onLogout, initialMember }) {
   const [active, setActive] = useState('Overview');
   const [mobileNav, setMobileNav] = useState(false);
   const [search, setSearch] = useState('');
   const [completed, setCompleted] = useState(() => JSON.parse(localStorage.getItem('re_demo_completed') || '[]'));
   const [balance, setBalance] = useState(() => Number(localStorage.getItem('re_demo_balance') || 0));
   const [withdrawals, setWithdrawals] = useState(() => JSON.parse(localStorage.getItem('re_demo_withdrawals') || '[]'));
-  const [profile, setProfile] = useState(() => JSON.parse(localStorage.getItem('re_demo_profile') || '{"name":"Testing Member","phone":"","email":"testing@gmail.com","bank":"","account":""}'));
+  const [profile, setProfile] = useState(() => JSON.parse(localStorage.getItem('re_demo_profile') || JSON.stringify({name:initialMember?.name||'Testing Member',phone:initialMember?.phone||'',email:initialMember?.email||'testing@gmail.com',bank:'',account:''})));
   const [notice, setNotice] = useState('');
   const [withdrawForm, setWithdrawForm] = useState({ amount: '', bank: '', account: '', name: '' });
   const referralLink = 'https://read-earn.vercel.app/register?ref=TESTING';
@@ -64,7 +64,7 @@ export default function MemberDashboard({ onLogout }) {
     <div className="member-brand"><span><BookOpen size={22}/></span><b>Read<span>Earn</span><small>MEMBER SPACE</small></b><button className="member-close" onClick={()=>setMobileNav(false)}><X/></button></div>
     <div className="member-nav-label">MENU</div>
     <nav>{navItems.map(([label, Icon]) => <button key={label} className={active===label?'member-nav-active':''} onClick={()=>{setActive(label);setMobileNav(false);}}><Icon size={18}/>{label}{label==='Notifications'&&<i>2</i>}</button>)}</nav>
-    <div className="member-sidebar-bottom"><div className="member-help"><CircleHelp size={18}/><b>Need help?</b><small>We're here to help you.</small><a href="mailto:electrostock.zyx@gmail.com">Contact support</a></div><button className="member-logout" onClick={onLogout}><LogOut size={17}/> Log out</button></div>
+    <div className="member-sidebar-bottom"><div className="member-help"><CircleHelp size={18}/><b>Need help?</b><small>We're here to help you.</small><span className="member-support-soon">Support centre coming soon</span></div><button className="member-logout" onClick={onLogout}><LogOut size={17}/> Log out</button></div>
   </aside>;
 
   return <div className="member-app">
