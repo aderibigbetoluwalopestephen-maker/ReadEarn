@@ -390,3 +390,29 @@ body{background:#071a35;color:#f4f7ff}
 .membership-card .member-primary{margin-top:auto}
 @media(max-width:1050px){.membership-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
 @media(max-width:650px){.membership-grid{grid-template-columns:1fr}.login-reward-panel{align-items:flex-start;flex-wrap:wrap}.login-reward-panel>strong{margin-left:0}.login-reward-panel .member-primary{width:100%}.mining-hero{padding:22px 16px}.mining-countdown{font-size:27px}.mining-overview-row{align-items:flex-start;flex-direction:column}}
+
+
+/* Spin & Win prize wheel */
+.spin-layout{display:grid;grid-template-columns:minmax(0,1.1fr) minmax(260px,.9fr);gap:16px;align-items:start}
+.spin-panel{display:flex;flex-direction:column;align-items:center;text-align:center;padding:26px}
+.spin-wheel-wrap{width:min(100%,360px);aspect-ratio:1;position:relative;display:grid;place-items:center;margin:8px auto 24px}
+.spin-wheel{width:100%;height:100%;border-radius:50%;position:relative;border:8px solid #e4bd68;box-shadow:0 0 0 5px #102b4b,0 15px 35px #0007;overflow:hidden;background:conic-gradient(#e4bd68 0deg 32.727deg,#15385d 32.727deg 65.454deg,#d7a94f 65.454deg 98.181deg,#102b4b 98.181deg 130.908deg,#e4bd68 130.908deg 163.635deg,#15385d 163.635deg 196.362deg,#d7a94f 196.362deg 229.089deg,#102b4b 229.089deg 261.816deg,#e4bd68 261.816deg 294.543deg,#15385d 294.543deg 327.27deg,#d7a94f 327.27deg 360deg);transition:transform 5.2s cubic-bezier(.12,.78,.12,1)}
+.spin-wheel:after{content:"";position:absolute;inset:0;border-radius:50%;border:1px solid #ffffff55;pointer-events:none}
+.spin-wheel-label{position:absolute;left:50%;top:50%;width:62px;margin-left:-31px;margin-top:-10px;text-align:center;font-size:10px;font-weight:900;color:#10233d;text-shadow:0 1px 0 #ffffff80;transform:rotate(calc(var(--spin-index)*32.727deg + 16.36deg)) translateY(-128px) rotate(90deg);transform-origin:center}
+.spin-wheel-label:nth-child(even){color:#f8f4e9;text-shadow:0 1px 2px #0008}
+.spin-wheel-center{position:absolute;z-index:2;left:50%;top:50%;width:76px;height:76px;margin:-38px;border:5px solid #e4bd68;border-radius:50%;background:#071a35;color:#e4bd68;display:flex;flex-direction:column;align-items:center;justify-content:center;box-shadow:0 4px 12px #0008}
+.spin-wheel-center b{font-size:9px;letter-spacing:1px;margin-top:2px}
+.spin-pointer{position:absolute;z-index:4;top:-5px;left:50%;transform:translateX(-50%);width:0;height:0;border-left:17px solid transparent;border-right:17px solid transparent;border-top:35px solid #f4d58d;filter:drop-shadow(0 3px 3px #0008)}
+.spin-button{max-width:300px;min-height:48px;font-size:12px;letter-spacing:1px}
+.spin-result{display:flex;align-items:center;gap:12px;margin-top:17px;padding:13px 18px;border:1px solid #e4bd6870;border-radius:10px;background:#e4bd6818;color:#e4bd68;text-align:left}
+.spin-result b,.spin-result small{display:block}.spin-result b{font-size:14px}.spin-result small{font-size:9px;color:#bdc9dc;margin-top:4px}
+.spin-panel>.demo-warning{max-width:520px;text-align:left;margin-top:18px}
+.spin-prize-panel h3{margin-bottom:6px}.spin-prize-panel>p{font-size:10px;color:#aebed4;margin:0 0 15px}
+.spin-prize-list{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}
+.spin-prize-list>div{display:flex;justify-content:space-between;align-items:center;gap:6px;padding:11px 12px;border:1px solid #ffffff20;border-radius:8px;background:#071a35;color:#f4f7fc;font-size:11px;font-weight:800}
+.spin-prize-list>div:first-child,.spin-prize-list>div:nth-child(2),.spin-prize-list>div:nth-child(3){border-color:#e4bd6870;color:#f4d58d}
+.spin-prize-list small{font-size:8px;color:#e4bd68;text-transform:uppercase;letter-spacing:.7px}
+.spin-odds-note{display:flex;align-items:center;gap:9px;padding:13px;margin-top:15px;border-radius:9px;background:#e4bd6815;color:#e4bd68;font-size:9px;line-height:1.6}
+.spin-odds-note svg{flex-shrink:0}
+@media(max-width:850px){.spin-layout{grid-template-columns:1fr}}
+@media(max-width:430px){.spin-panel{padding:18px 12px}.spin-wheel-label{transform:rotate(calc(var(--spin-index)*32.727deg + 16.36deg)) translateY(-108px) rotate(90deg);font-size:9px}.spin-wheel-wrap{width:min(100%,310px)}.spin-wheel-center{width:66px;height:66px;margin:-33px}.spin-prize-list{grid-template-columns:1fr 1fr}}
