@@ -23,6 +23,8 @@ function App() {
   const [authMode, setAuthMode] = useState(null);
 
   const closeMenu = () => setMenuOpen(false);
+  const openLogin = (event) => { event?.preventDefault(); event?.stopPropagation(); setMenuOpen(false); setAuthMode('login'); };
+  const openRegister = (event) => { event?.preventDefault(); event?.stopPropagation(); setMenuOpen(false); setAuthMode('register'); };
 
   if (authMode) return <AuthPage mode={authMode} onMode={setAuthMode} onBack={()=>setAuthMode(null)} />;
   return (
@@ -38,8 +40,8 @@ function App() {
           <a href="#how" onClick={closeMenu}>How it works</a>
           <a href="#benefits" onClick={closeMenu}>Why ReadEarn</a>
           <a href="#faq" onClick={closeMenu}>FAQs</a>
-          <button type="button" className="nav-login auth-nav-button" onClick={()=>{closeMenu();setAuthMode("login")}}>Log in</button>
-          <button type="button" className="button button-small" onClick={()=>{closeMenu();setAuthMode("register")}}>Create account <ArrowRight size={16} /></button>
+          <button type="button" className="nav-login auth-nav-button" onClick={openLogin}>Log in</button>
+          <button type="button" className="button button-small" onClick={openRegister}>Create account <ArrowRight size={16} /></button>
         </nav>
       </header>
 
@@ -50,7 +52,7 @@ function App() {
             <h1>Make every page<br /> <em>count.</em></h1>
             <p className="hero-text">Read interesting content, take part in activities and keep track of your rewards — all in one simple place.</p>
             <div className="hero-actions">
-              <button type="button" className="button" onClick={()=>setAuthMode("register")}>Get started for free <ArrowRight size={18} /></button>
+              <button type="button" className="button" onClick={openRegister}>Get started for free <ArrowRight size={18} /></button>
               <a className="text-link" href="#how">See how it works <span>↗</span></a>
             </div>
             <div className="hero-trust"><span className="trust-icons"><i><BookOpen size={14}/></i><i><ShieldCheck size={14}/></i><i><Users size={14}/></i></span><span>A community built around reading and growth</span></div>
