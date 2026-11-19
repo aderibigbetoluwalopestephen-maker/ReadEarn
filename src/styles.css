@@ -416,3 +416,20 @@ body{background:#071a35;color:#f4f7ff}
 .spin-odds-note svg{flex-shrink:0}
 @media(max-width:850px){.spin-layout{grid-template-columns:1fr}}
 @media(max-width:430px){.spin-panel{padding:18px 12px}.spin-wheel-label{transform:rotate(calc(var(--spin-index)*32.727deg + 16.36deg)) translateY(-108px) rotate(90deg);font-size:9px}.spin-wheel-wrap{width:min(100%,310px)}.spin-wheel-center{width:66px;height:66px;margin:-33px}.spin-prize-list{grid-template-columns:1fr 1fr}}
+
+
+/* Rotating example withdrawal activity feed */
+.live-withdrawal-panel{margin-top:16px}
+.activity-live-label{display:inline-flex;align-items:center;gap:6px;padding:6px 9px;border-radius:20px;background:#e4bd6818;color:#e4bd68;font-size:8px;font-weight:900;letter-spacing:.8px;white-space:nowrap}
+.activity-live-label i{width:7px;height:7px;border-radius:50%;background:#e4bd68;box-shadow:0 0 0 4px #e4bd6825;animation:withdrawalPulse 1.5s infinite}
+.withdrawal-feed-list{display:flex;flex-direction:column}
+.withdrawal-feed-row{display:grid;grid-template-columns:34px minmax(0,1fr) auto auto;align-items:center;gap:10px;padding:12px 0;border-bottom:1px solid #ffffff16}
+.withdrawal-feed-avatar{width:32px;height:32px;border-radius:50%;display:grid;place-items:center;background:#e4bd6820;color:#e4bd68;font-size:12px;font-weight:900}
+.withdrawal-feed-row>div{display:flex;flex-direction:column;gap:4px;min-width:0}
+.withdrawal-feed-row>div b{font-size:10px;color:#f4f7fc}
+.withdrawal-feed-row>div small{font-size:8px;color:#9fb0c8}
+.withdrawal-feed-row>strong{font-size:11px;color:#e4bd68;white-space:nowrap}
+.withdrawal-demo-tag{padding:4px 6px;border-radius:4px;border:1px solid #ffffff24;color:#aebed4;font-size:7px;font-weight:800;letter-spacing:.6px}
+.withdrawal-feed-disclaimer{margin:12px 0 0;color:#9fb0c8;font-size:8px;line-height:1.6}
+@keyframes withdrawalPulse{0%,100%{opacity:1}50%{opacity:.35}}
+@media(max-width:520px){.withdrawal-feed-row{grid-template-columns:30px minmax(0,1fr) auto;gap:8px}.withdrawal-demo-tag{display:none}.withdrawal-feed-row>strong{font-size:10px}.activity-live-label{font-size:7px}}
