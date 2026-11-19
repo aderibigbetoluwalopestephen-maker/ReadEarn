@@ -38,8 +38,8 @@ function App() {
           <a href="#how" onClick={closeMenu}>How it works</a>
           <a href="#benefits" onClick={closeMenu}>Why ReadEarn</a>
           <a href="#faq" onClick={closeMenu}>FAQs</a>
-          <a className="nav-login" href="#login" onClick={(e)=>{e.preventDefault();closeMenu();setAuthMode("login")}}>Log in</a>
-          <a className="button button-small" href="#register" onClick={(e)=>{e.preventDefault();closeMenu();setAuthMode("register")}}>Create account <ArrowRight size={16} /></a>
+          <button type="button" className="nav-login auth-nav-button" onClick={()=>{closeMenu();setAuthMode("login")}}>Log in</button>
+          <button type="button" className="button button-small" onClick={()=>{closeMenu();setAuthMode("register")}}>Create account <ArrowRight size={16} /></button>
         </nav>
       </header>
 
@@ -50,7 +50,7 @@ function App() {
             <h1>Make every page<br /> <em>count.</em></h1>
             <p className="hero-text">Read interesting content, take part in activities and keep track of your rewards — all in one simple place.</p>
             <div className="hero-actions">
-              <a className="button" href="#register" onClick={(e)=>{e.preventDefault();setAuthMode("register")}}>Get started for free <ArrowRight size={18} /></a>
+              <button type="button" className="button" onClick={()=>setAuthMode("register")}>Get started for free <ArrowRight size={18} /></button>
               <a className="text-link" href="#how">See how it works <span>↗</span></a>
             </div>
             <div className="hero-trust"><span className="trust-icons"><i><BookOpen size={14}/></i><i><ShieldCheck size={14}/></i><i><Users size={14}/></i></span><span>A community built around reading and growth</span></div>
@@ -80,7 +80,7 @@ function App() {
           <div className="benefit-grid">{benefits.map(({icon: Icon, title, text}, i) => <article className="benefit-card" key={title}><div className="benefit-icon"><Icon size={23}/></div><span className="card-number">0{i+1}</span><h3>{title}</h3><p>{text}</p><a href="#how">Learn more <ArrowRight size={15}/></a></article>)}</div>
         </section>
 
-        <section className="how-section" id="how"><div className="section-wrap how-inner"><div className="how-intro"><div className="eyebrow">GETTING STARTED IS SIMPLE</div><h2>Your journey<br/>starts <em>here.</em></h2><p>Join the community and follow a clear process from registration to tracking your activity.</p><a className="button button-light" href="#register" onClick={(e)=>{e.preventDefault();setAuthMode("register")}}>Join ReadEarn <ArrowRight size={17}/></a></div><div className="steps-list">{steps.map(([number,title,text]) => <div className="step" key={number}><div className="step-number">{number}</div><div><h3>{title}</h3><p>{text}</p></div><ArrowRight className="step-arrow" size={19}/></div>)}</div></div></section>
+        <section className="how-section" id="how"><div className="section-wrap how-inner"><div className="how-intro"><div className="eyebrow">GETTING STARTED IS SIMPLE</div><h2>Your journey<br/>starts <em>here.</em></h2><p>Join the community and follow a clear process from registration to tracking your activity.</p><button type="button" className="button button-light" onClick={()=>setAuthMode("register")}>Join ReadEarn <ArrowRight size={17}/></button></div><div className="steps-list">{steps.map(([number,title,text]) => <div className="step" key={number}><div className="step-number">{number}</div><div><h3>{title}</h3><p>{text}</p></div><ArrowRight className="step-arrow" size={19}/></div>)}</div></div></section>
 
         <section className="faq-section section-wrap" id="faq"><div className="section-heading"><div className="eyebrow centered">GOOD TO KNOW</div><h2>Frequently asked questions</h2><p>Some quick answers about getting started with ReadEarn.</p></div><div className="faq-list">{[
           ['Is joining ReadEarn free?', 'Creating an account is free. Any activity with a reward will show its requirements and eligibility conditions before you participate.'],
@@ -89,7 +89,7 @@ function App() {
           ['Can I withdraw my rewards?', 'Withdrawal options, minimum amounts and processing conditions will be displayed in your account once the wallet and payment features are enabled.']
         ].map(([q,a],i)=><div className={'faq-item '+(faqOpen===i?'faq-active':'')} key={q}><button onClick={()=>setFaqOpen(faqOpen===i?-1:i)}><span>{q}</span><ChevronDown size={19}/></button>{faqOpen===i&&<p>{a}</p>}</div>)}</div></section>
 
-        <section className="cta-section section-wrap" id="get-started"><div className="cta-card"><div className="cta-decoration">✦</div><div className="eyebrow centered">YOUR NEXT CHAPTER STARTS NOW</div><h2>Ready to make your<br/><em>reading count?</em></h2><p>Create your free account and be part of the ReadEarn community.</p><a className="button" href="#register" onClick={(e)=>{e.preventDefault();setAuthMode("register")}}>Get started <ArrowRight size={17}/></a><small>Registration and member dashboard are coming online next.</small></div></section>
+        <section className="cta-section section-wrap" id="get-started"><div className="cta-card"><div className="cta-decoration">✦</div><div className="eyebrow centered">YOUR NEXT CHAPTER STARTS NOW</div><h2>Ready to make your<br/><em>reading count?</em></h2><p>Create your free account and be part of the ReadEarn community.</p><button type="button" className="button" onClick={()=>setAuthMode("register")}>Get started <ArrowRight size={17}/></button><small>Free registration. Join the ReadEarn community today.</small></div></section>
       </main>
 
       <footer className="footer"><div className="section-wrap footer-inner"><a className="brand footer-brand" href="#home"><span className="brand-mark"><BookOpen size={21}/></span><span>Read<span className="brand-gold">Earn</span><small>READ. LEARN. GROW.</small></span></a><p>Make every page count.</p><div className="footer-bottom"><span>© {new Date().getFullYear()} ReadEarn. All rights reserved.</span><span>Built for readers, learners and curious minds.</span></div></div></footer>
