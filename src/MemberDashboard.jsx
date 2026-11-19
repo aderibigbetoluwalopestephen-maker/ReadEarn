@@ -49,11 +49,20 @@ const pickSpinPrize = () => {
 };
 
 const membershipPlans = [
-  { id: 'Free', price: 0, mining: 10, login: 5, withdrawal: 'Standard processing', detail: 'Standard daily mining and reading activities.' },
-  { id: 'Silver', price: 1500, mining: 25, login: 10, withdrawal: 'Faster processing', detail: 'Higher daily mining rewards and faster withdrawal queue.' },
-  { id: 'Gold', price: 3500, mining: 50, login: 20, withdrawal: 'Priority processing', detail: 'Enhanced mining rewards and priority withdrawal queue.' },
-  { id: 'VIP', price: 7500, mining: 100, login: 30, withdrawal: 'Highest priority', detail: 'Highest preview mining rate and top withdrawal priority.' }
+  { id: 'Free', price: 0, mining: 250, login: 75, withdrawal: 'Standard processing', detail: 'Standard daily mining and reading activities.' },
+  { id: 'Silver', price: 1500, mining: 650, login: 130, withdrawal: 'Faster processing', detail: 'Higher daily mining rewards and faster withdrawal queue.' },
+  { id: 'Gold', price: 3500, mining: 750, login: 150, withdrawal: 'Priority processing', detail: 'Enhanced mining rewards and priority withdrawal queue.' },
+  { id: 'VIP', price: 7500, mining: 1500, login: 250, withdrawal: 'Highest priority', detail: 'Highest preview mining rate and top withdrawal priority.' }
 ];
+
+const demoWithdrawalNames = ['Ada O.', 'Chinedu K.', 'Fatima A.', 'Tobi M.', 'Emeka N.', 'Zainab B.', 'Daniel E.', 'Blessing C.', 'Ibrahim S.', 'Grace T.'];
+const demoWithdrawalAmounts = [500, 750, 1000, 1500, 2000, 2500, 3500, 5000, 7500, 10000, 15000];
+const makeDemoWithdrawal = () => ({
+  id: Date.now() + Math.random(),
+  name: demoWithdrawalNames[Math.floor(Math.random() * demoWithdrawalNames.length)],
+  amount: demoWithdrawalAmounts[Math.floor(Math.random() * demoWithdrawalAmounts.length)],
+  time: 'Just now'
+});
 
 export default function MemberDashboard({ onLogout, initialMember }) {
   const memberId = (initialMember?.email || 'testing@gmail.com').trim().toLowerCase();
@@ -80,6 +89,7 @@ export default function MemberDashboard({ onLogout, initialMember }) {
   const [wheelRotation, setWheelRotation] = useState(0);
   const [spinning, setSpinning] = useState(false);
   const [spinResult, setSpinResult] = useState(null);
+  const [demoWithdrawalFeed, setDemoWithdrawalFeed] = useState(() => Array.from({ length: 5 }, makeDemoWithdrawal));
   const [withdrawForm, setWithdrawForm] = useState({ amount: '', bank: '', account: '', name: '' });
   const referralLink = 'https://read-earn.vercel.app/register?ref=TESTING';
 
@@ -94,6 +104,12 @@ export default function MemberDashboard({ onLogout, initialMember }) {
   useEffect(() => {
     const timer = window.setInterval(() => setClock(Date.now()), 1000);
     return () => window.clearInterval(timer);
+  }, []);
+  useEffect(() => {
+    const feedTimer = window.setInterval(() => {
+      setDemoWithdrawalFeed(prev => [makeDemoWithdrawal(), ...prev].slice(0, 5));
+    }, 6000);
+    return () => window.clearInterval(feedTimer);
   }, []);
 
   const earned = useMemo(() => completed.reduce((sum, id) => sum + (starterArticles.find(a => a.id === id)?.reward || 0), 0), [completed]);
@@ -195,6 +211,7 @@ export default function MemberDashboard({ onLogout, initialMember }) {
           </div>
           <section className="member-panel mining-overview-panel"><div className="member-panel-heading"><div><h3>Daily mining</h3><p>{currentPlan.id} plan · One 24-hour session at a time</p></div><button onClick={()=>setActive('Mining & Rewards')}>Open mining <ChevronRight size={16}/></button></div><div className="mining-overview-row"><strong>{money(currentPlan.mining)}</strong><span>{miningReady ? 'Reward ready to claim' : 'Time remaining ' + formatCountdown(miningRemaining)}</span></div><div className="daily-progress-track"><span style={{width:Math.min(100,((24*60*60*1000-miningRemaining)/(24*60*60*1000))*100)+'%'}}/></div><p className="mining-note">Mining continues while you are away. Return after 24 hours to claim and begin your next session.</p></section>
           <section className="member-panel login-reward-panel"><div><h3>Daily login reward</h3><p>Claim once each day you visit ReadEarn.</p></div><strong>{money(currentPlan.login)}</strong><button className="member-primary" disabled={loginClaimed} onClick={claimLoginReward}>{loginClaimed ? 'Claimed today ✓' : 'Claim login reward'}</button></section>
+          <section className="member-panel live-withdrawal-panel"><div className="member-panel-heading"><div><h3>Withdrawal activity</h3><p>Example transactions rotating every few seconds</p></div><span className="activity-live-label"><i/> DEMO FEED</span></div><div className="withdrawal-feed-list">{demoWithdrawalFeed.map(item=><div className="withdrawal-feed-row" key={item.id}><span className="withdrawal-feed-avatar">{item.name.slice(0,1)}</span><div><b>{item.name}</b><small>Sample withdrawal · {item.time}</small></div><strong>{money(item.amount)}</strong><span className="withdrawal-demo-tag">SAMPLE</span></div>)}</div><p className="withdrawal-feed-disclaimer">These names and amounts are randomly generated examples for the website preview. They are not actual member withdrawals or payment records.</p></section>
           <section className="member-panel daily-overview-panel"><div className="member-panel-heading"><div><h3>Today's tasks</h3><p>{dailyCompleted.length} of {dailyTaskTemplates.length} completed · Resets at midnight (Nigeria time)</p></div><button onClick={()=>setActive('Daily Tasks')}>View tasks <ChevronRight size={16}/></button></div><div className="daily-progress-track"><span style={{width:((dailyCompleted.length/dailyTaskTemplates.length)*100)+'%'}}/></div><div className="daily-overview-items">{dailyTaskTemplates.slice(0,3).map(task=><span key={task.id}><CheckCircle2 size={15}/>{task.title}</span>)}</div></section>
           <div className="member-two-col"><section className="member-panel"><div className="member-panel-heading"><div><h3>Continue reading</h3><p>Explore available reading activities</p></div><button onClick={()=>setActive('Read & Earn')}>View all <ChevronRight size={16}/></button></div>{starterArticles.slice(0,3).map(a=><div className="mini-article" key={a.id}><span className="mini-book"><BookOpen/></span><div><b>{a.title}</b><small>{a.minutes} min read · Reward {money(a.reward)}</small></div><button onClick={()=>setActive('Read & Earn')} aria-label="Open article"><ChevronRight/></button></div>)}</section><section className="member-panel referral-panel"><span className="referral-gift"><Gift/></span><h3>Invite friends, grow together</h3><p>Share your personal referral link with friends. Referral rewards will be enabled when the platform backend is connected.</p><div className="referral-copy"><span>{referralLink}</span><button onClick={copyReferral}><Copy size={16}/> Copy</button></div><small className="demo-note">Demo referral link</small></section></div>
           <section className="member-panel"><div className="member-panel-heading"><div><h3>Recent activity</h3><p>Your latest reading and wallet activity</p></div></div>{completed.length===0?<div className="member-empty"><Clock3/><b>No activity yet</b><span>Complete your first reading activity to see it here.</span></div>:completed.slice(-4).reverse().map(id=>{const a=starterArticles.find(x=>x.id===id);return a&&<div className="activity-row" key={id}><CheckCircle2/><div><b>{a.title}</b><small>Reading reward · Completed</small></div><strong>+{money(a.reward)}</strong></div>})}</section>
