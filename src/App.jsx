@@ -26,7 +26,7 @@ function App() {
   const openLogin = (event) => { event?.preventDefault(); event?.stopPropagation(); setMenuOpen(false); setAuthMode('login'); };
   const openRegister = (event) => { event?.preventDefault(); event?.stopPropagation(); setMenuOpen(false); setAuthMode('register'); };
 
-  if (authMode) return <AuthPage mode={authMode} onMode={setAuthMode} onBack={()=>setAuthMode(null)} />;
+  if (authMode === "login" || authMode === "register") return <AuthPage key={authMode} mode={authMode} onMode={setAuthMode} onBack={()=>setAuthMode(null)} />;
   return (
     <div className="site-shell">
       <div className="announcement"><Sparkles size={14} /> A smarter way to make your reading time count <span>Explore ReadEarn <ArrowRight size={13} /></span></div>
@@ -82,7 +82,7 @@ function App() {
           <div className="benefit-grid">{benefits.map(({icon: Icon, title, text}, i) => <article className="benefit-card" key={title}><div className="benefit-icon"><Icon size={23}/></div><span className="card-number">0{i+1}</span><h3>{title}</h3><p>{text}</p><a href="#how">Learn more <ArrowRight size={15}/></a></article>)}</div>
         </section>
 
-        <section className="how-section" id="how"><div className="section-wrap how-inner"><div className="how-intro"><div className="eyebrow">GETTING STARTED IS SIMPLE</div><h2>Your journey<br/>starts <em>here.</em></h2><p>Join the community and follow a clear process from registration to tracking your activity.</p><button type="button" className="button button-light" onClick={()=>setAuthMode("register")}>Join ReadEarn <ArrowRight size={17}/></button></div><div className="steps-list">{steps.map(([number,title,text]) => <div className="step" key={number}><div className="step-number">{number}</div><div><h3>{title}</h3><p>{text}</p></div><ArrowRight className="step-arrow" size={19}/></div>)}</div></div></section>
+        <section className="how-section" id="how"><div className="section-wrap how-inner"><div className="how-intro"><div className="eyebrow">GETTING STARTED IS SIMPLE</div><h2>Your journey<br/>starts <em>here.</em></h2><p>Join the community and follow a clear process from registration to tracking your activity.</p><button type="button" className="button button-light" onClick={openRegister}>Join ReadEarn <ArrowRight size={17}/></button></div><div className="steps-list">{steps.map(([number,title,text]) => <div className="step" key={number}><div className="step-number">{number}</div><div><h3>{title}</h3><p>{text}</p></div><ArrowRight className="step-arrow" size={19}/></div>)}</div></div></section>
 
         <section className="faq-section section-wrap" id="faq"><div className="section-heading"><div className="eyebrow centered">GOOD TO KNOW</div><h2>Frequently asked questions</h2><p>Some quick answers about getting started with ReadEarn.</p></div><div className="faq-list">{[
           ['Is joining ReadEarn free?', 'Creating an account is free. Any activity with a reward will show its requirements and eligibility conditions before you participate.'],
@@ -91,7 +91,7 @@ function App() {
           ['Can I withdraw my rewards?', 'Withdrawal options, minimum amounts and processing conditions will be displayed in your account once the wallet and payment features are enabled.']
         ].map(([q,a],i)=><div className={'faq-item '+(faqOpen===i?'faq-active':'')} key={q}><button onClick={()=>setFaqOpen(faqOpen===i?-1:i)}><span>{q}</span><ChevronDown size={19}/></button>{faqOpen===i&&<p>{a}</p>}</div>)}</div></section>
 
-        <section className="cta-section section-wrap" id="get-started"><div className="cta-card"><div className="cta-decoration">✦</div><div className="eyebrow centered">YOUR NEXT CHAPTER STARTS NOW</div><h2>Ready to make your<br/><em>reading count?</em></h2><p>Create your free account and be part of the ReadEarn community.</p><button type="button" className="button" onClick={()=>setAuthMode("register")}>Get started <ArrowRight size={17}/></button><small>Free registration. Join the ReadEarn community today.</small></div></section>
+        <section className="cta-section section-wrap" id="get-started"><div className="cta-card"><div className="cta-decoration">✦</div><div className="eyebrow centered">YOUR NEXT CHAPTER STARTS NOW</div><h2>Ready to make your<br/><em>reading count?</em></h2><p>Create your free account and be part of the ReadEarn community.</p><button type="button" className="button" onClick={openRegister}>Get started <ArrowRight size={17}/></button><small>Free registration. Join the ReadEarn community today.</small></div></section>
       </main>
 
       <footer className="footer"><div className="section-wrap footer-inner"><a className="brand footer-brand" href="#home"><span className="brand-mark"><BookOpen size={21}/></span><span>Read<span className="brand-gold">Earn</span><small>READ. LEARN. GROW.</small></span></a><p>Make every page count.</p><div className="footer-bottom"><span>© {new Date().getFullYear()} ReadEarn. All rights reserved.</span><span>Built for readers, learners and curious minds.</span></div></div></footer>
