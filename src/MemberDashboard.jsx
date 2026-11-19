@@ -13,7 +13,7 @@ const starterArticles = [
   { id: 4, category: 'Money matters', title: 'Simple Habits for Better Money Management', excerpt: 'Understand budgeting basics and build healthier habits around saving and spending.', minutes: 5, reward: 60 }
 ];
 const navItems = [
-  ['Overview', LayoutDashboard], ['Daily Tasks', ListChecks], ['Read & Earn', BookOpen], ['My Referrals', Users],
+  ['Overview', LayoutDashboard], ['Mining & Rewards', Flame], ['Membership', BadgeCheck], ['Daily Tasks', ListChecks], ['Read & Earn', BookOpen], ['My Referrals', Users],
   ['My Wallet', Wallet], ['Withdrawals', ArrowUpRight], ['Notifications', Bell], ['My Profile', UserRound]
 ];
 const money = n => '₦' + Number(n || 0).toLocaleString('en-NG');
@@ -24,6 +24,12 @@ const dailyTaskTemplates = [
   { id: 'check-wallet', title: 'Review your wallet', description: 'Visit your wallet and review your rewards.', reward: 10, icon: Wallet }
 ];
 const lagosDateKey = () => new Intl.DateTimeFormat('en-CA', { timeZone: 'Africa/Lagos', year: 'numeric', month: '2-digit', day: '2-digit' }).format(new Date());
+const membershipPlans = [
+  { id: 'Free', price: 0, mining: 10, login: 5, withdrawal: 'Standard processing', detail: 'Standard daily mining and reading activities.' },
+  { id: 'Silver', price: 1500, mining: 25, login: 10, withdrawal: 'Faster processing', detail: 'Higher daily mining rewards and faster withdrawal queue.' },
+  { id: 'Gold', price: 3500, mining: 50, login: 20, withdrawal: 'Priority processing', detail: 'Enhanced mining rewards and priority withdrawal queue.' },
+  { id: 'VIP', price: 7500, mining: 100, login: 30, withdrawal: 'Highest priority', detail: 'Highest preview mining rate and top withdrawal priority.' }
+];
 
 export default function MemberDashboard({ onLogout, initialMember }) {
   const memberId = (initialMember?.email || 'testing@gmail.com').trim().toLowerCase();
@@ -38,6 +44,14 @@ export default function MemberDashboard({ onLogout, initialMember }) {
   const todayKey = lagosDateKey();
   const dailyStorageKey = storageKey('daily_' + todayKey);
   const [dailyCompleted, setDailyCompleted] = useState(() => JSON.parse(localStorage.getItem(dailyStorageKey) || '[]'));
+  const [membership, setMembership] = useState(() => localStorage.getItem(storageKey('membership')) || 'Free');
+  const [mining, setMining] = useState(() => {
+    const saved = JSON.parse(localStorage.getItem(storageKey('mining')) || 'null');
+    return saved || { startedAt: Date.now(), endsAt: Date.now() + 24 * 60 * 60 * 1000 };
+  });
+  const [clock, setClock] = useState(Date.now());
+  const loginRewardKey = storageKey('login_reward_' + todayKey);
+  const [loginClaimed, setLoginClaimed] = useState(() => localStorage.getItem(loginRewardKey) === 'claimed');
   const [notice, setNotice] = useState('');
   const [withdrawForm, setWithdrawForm] = useState({ amount: '', bank: '', account: '', name: '' });
   const referralLink = 'https://read-earn.vercel.app/register?ref=TESTING';
@@ -47,10 +61,41 @@ export default function MemberDashboard({ onLogout, initialMember }) {
   useEffect(() => { localStorage.setItem(storageKey('withdrawals'), JSON.stringify(withdrawals)); }, [withdrawals]);
   useEffect(() => { localStorage.setItem(storageKey('profile'), JSON.stringify(profile)); }, [profile]);
   useEffect(() => { localStorage.setItem(dailyStorageKey, JSON.stringify(dailyCompleted)); }, [dailyCompleted, dailyStorageKey]);
+  useEffect(() => { localStorage.setItem(storageKey('membership'), membership); }, [membership]);
+  useEffect(() => { localStorage.setItem(storageKey('mining'), JSON.stringify(mining)); }, [mining]);
+  useEffect(() => { localStorage.setItem(loginRewardKey, loginClaimed ? 'claimed' : ''); }, [loginClaimed, loginRewardKey]);
+  useEffect(() => {
+    const timer = window.setInterval(() => setClock(Date.now()), 1000);
+    return () => window.clearInterval(timer);
+  }, []);
 
   const earned = useMemo(() => completed.reduce((sum, id) => sum + (starterArticles.find(a => a.id === id)?.reward || 0), 0), [completed]);
   const filtered = starterArticles.filter(a => (a.title + a.category + a.excerpt).toLowerCase().includes(search.toLowerCase()));
   const toast = msg => { setNotice(msg); window.setTimeout(() => setNotice(''), 3000); };
+  const currentPlan = membershipPlans.find(p => p.id === membership) || membershipPlans[0];
+  const miningRemaining = Math.max(0, mining.endsAt - clock);
+  const miningReady = miningRemaining === 0;
+  const formatCountdown = ms => {
+    const total = Math.floor(ms / 1000);
+    return [Math.floor(total / 3600), Math.floor((total % 3600) / 60), total % 60].map(n => String(n).padStart(2, '0')).join(':');
+  };
+  const claimLoginReward = () => {
+    if (loginClaimed) return toast('You have already claimed today’s login reward.');
+    setLoginClaimed(true);
+    setBalance(prev => prev + currentPlan.login);
+    toast(money(currentPlan.login) + ' daily login reward added to your demo wallet.');
+  };
+  const claimMiningReward = () => {
+    if (!miningReady) return toast('Your 24-hour mining session is still running.');
+    setBalance(prev => prev + currentPlan.mining);
+    const now = Date.now();
+    setMining({ startedAt: now, endsAt: now + 24 * 60 * 60 * 1000 });
+    toast(money(currentPlan.mining) + ' demo mining reward claimed. Your next 24-hour session has started.');
+  };
+  const previewMembership = plan => {
+    if (plan.id === 'Free') { setMembership('Free'); return toast('Free membership selected.'); }
+    toast('Membership payment is not connected yet. This plan is shown as a preview only.');
+  };
   const completeDailyTask = task => {
     if (dailyCompleted.includes(task.id)) return toast('You have already completed this task today.');
     setDailyCompleted(prev => [...prev, task.id]);
@@ -101,10 +146,14 @@ export default function MemberDashboard({ onLogout, initialMember }) {
             <article><span className="stat-icon purple"><BookOpen/></span><small>Articles completed</small><strong>{completed.length}</strong><em>Keep your learning streak</em></article>
             <article><span className="stat-icon green"><Users/></span><small>My referrals</small><strong>0</strong><em>Referral tracking preview</em></article>
           </div>
+          <section className="member-panel mining-overview-panel"><div className="member-panel-heading"><div><h3>Daily mining</h3><p>{currentPlan.id} plan · One 24-hour session at a time</p></div><button onClick={()=>setActive('Mining & Rewards')}>Open mining <ChevronRight size={16}/></button></div><div className="mining-overview-row"><strong>{money(currentPlan.mining)}</strong><span>{miningReady ? 'Reward ready to claim' : 'Time remaining ' + formatCountdown(miningRemaining)}</span></div><div className="daily-progress-track"><span style={{width:Math.min(100,((24*60*60*1000-miningRemaining)/(24*60*60*1000))*100)+'%'}}/></div><p className="mining-note">Mining continues while you are away. Return after 24 hours to claim and begin your next session.</p></section>
+          <section className="member-panel login-reward-panel"><div><h3>Daily login reward</h3><p>Claim once each day you visit ReadEarn.</p></div><strong>{money(currentPlan.login)}</strong><button className="member-primary" disabled={loginClaimed} onClick={claimLoginReward}>{loginClaimed ? 'Claimed today ✓' : 'Claim login reward'}</button></section>
           <section className="member-panel daily-overview-panel"><div className="member-panel-heading"><div><h3>Today's tasks</h3><p>{dailyCompleted.length} of {dailyTaskTemplates.length} completed · Resets at midnight (Nigeria time)</p></div><button onClick={()=>setActive('Daily Tasks')}>View tasks <ChevronRight size={16}/></button></div><div className="daily-progress-track"><span style={{width:((dailyCompleted.length/dailyTaskTemplates.length)*100)+'%'}}/></div><div className="daily-overview-items">{dailyTaskTemplates.slice(0,3).map(task=><span key={task.id}><CheckCircle2 size={15}/>{task.title}</span>)}</div></section>
           <div className="member-two-col"><section className="member-panel"><div className="member-panel-heading"><div><h3>Continue reading</h3><p>Explore available reading activities</p></div><button onClick={()=>setActive('Read & Earn')}>View all <ChevronRight size={16}/></button></div>{starterArticles.slice(0,3).map(a=><div className="mini-article" key={a.id}><span className="mini-book"><BookOpen/></span><div><b>{a.title}</b><small>{a.minutes} min read · Reward {money(a.reward)}</small></div><button onClick={()=>setActive('Read & Earn')} aria-label="Open article"><ChevronRight/></button></div>)}</section><section className="member-panel referral-panel"><span className="referral-gift"><Gift/></span><h3>Invite friends, grow together</h3><p>Share your personal referral link with friends. Referral rewards will be enabled when the platform backend is connected.</p><div className="referral-copy"><span>{referralLink}</span><button onClick={copyReferral}><Copy size={16}/> Copy</button></div><small className="demo-note">Demo referral link</small></section></div>
           <section className="member-panel"><div className="member-panel-heading"><div><h3>Recent activity</h3><p>Your latest reading and wallet activity</p></div></div>{completed.length===0?<div className="member-empty"><Clock3/><b>No activity yet</b><span>Complete your first reading activity to see it here.</span></div>:completed.slice(-4).reverse().map(id=>{const a=starterArticles.find(x=>x.id===id);return a&&<div className="activity-row" key={id}><CheckCircle2/><div><b>{a.title}</b><small>Reading reward · Completed</small></div><strong>+{money(a.reward)}</strong></div>})}</section>
         </>}
+        {active==='Mining & Rewards' && <><div className="member-page-intro"><h2>Your daily mining</h2><p>Your mining session runs for 24 hours, including when you are logged out. Return when the countdown ends to claim your reward and start another session.</p></div><div className="mining-hero"><div className="mining-hero-icon"><Flame size={27}/></div><span className="member-kicker">{currentPlan.id.toUpperCase()} MEMBERSHIP MINING</span><strong>{money(currentPlan.mining)}</strong><small>Preview reward per completed 24-hour session</small><div className="mining-countdown">{miningReady ? '24:00:00' : formatCountdown(miningRemaining)}</div><p>{miningReady ? 'Your mining reward is ready.' : 'Time until your next mining reward can be claimed'}</p><div className="daily-progress-track"><span style={{width:Math.min(100,((24*60*60*1000-miningRemaining)/(24*60*60*1000))*100)+'%'}}/></div><button className="member-primary" disabled={!miningReady} onClick={claimMiningReward}>{miningReady ? 'Claim mining reward & start next session' : 'Mining in progress'}</button></div><div className="daily-summary"><div><small>MINING RATE</small><strong>{money(currentPlan.mining)} / 24h</strong></div><div><small>DAILY LOGIN REWARD</small><strong>{money(currentPlan.login)}</strong></div><div><small>WITHDRAWAL BENEFIT</small><strong>{currentPlan.withdrawal}</strong></div></div><section className="member-panel"><h3>How mining works</h3><div className="activity-row"><CheckCircle2/><div><b>Automatic session start</b><small>Your first 24-hour session starts when you open your member dashboard.</small></div></div><div className="activity-row"><Clock3/><div><b>24-hour countdown</b><small>The timer is based on the saved start and end time, so it continues while you are offline.</small></div></div><div className="activity-row"><Coins/><div><b>Claim when complete</b><small>After 24 hours, claim the displayed reward to start your next mining session.</small></div></div></section><p className="demo-warning">Important: this is a local browser demonstration, not cryptocurrency mining or guaranteed income. Real mining schedules, balances and reward claims must be verified by a secure server before launch.</p></>}
+        {active==='Membership' && <><div className="member-page-intro"><h2>Choose your membership</h2><p>Higher plans show higher preview reward rates and faster withdrawal priority. Paid upgrades will only activate after a verified payment is connected.</p></div><div className="membership-grid">{membershipPlans.map(plan=><article className={'membership-card '+(membership===plan.id?'membership-current':'')} key={plan.id}><span className="membership-plan-name">{plan.id}</span><strong>{plan.price===0?'Free':money(plan.price)+'/month'}</strong><p>{plan.detail}</p><div><span>Mining every 24 hours</span><b>{money(plan.mining)}</b></div><div><span>Daily login reward</span><b>{money(plan.login)}</b></div><div><span>Withdrawals</span><b>{plan.withdrawal}</b></div><button className="member-primary" disabled={membership===plan.id} onClick={()=>previewMembership(plan)}>{membership===plan.id?'Current plan':plan.price===0?'Select Free':'Payment coming soon'}</button></article>)}</div><p className="demo-warning">Plan prices and reward rates are proposed preview values, not an active offer. Selecting a paid plan will not charge you or upgrade your account until payment verification is implemented.</p></>}
         {active==='Daily Tasks' && <><div className="member-page-intro"><h2>Your daily tasks</h2><p>Complete today's activities to collect extra demo rewards. Your checklist refreshes every day at midnight in Nigeria time.</p></div><div className="daily-summary"><div><small>DAILY PROGRESS</small><strong>{dailyCompleted.length} / {dailyTaskTemplates.length}</strong></div><div><small>REWARDS EARNED TODAY</small><strong>{money(dailyTaskTemplates.filter(t=>dailyCompleted.includes(t.id)).reduce((sum,t)=>sum+t.reward,0))}</strong></div><div><small>DATE (NIGERIA)</small><strong>{new Date().toLocaleDateString('en-NG',{timeZone:'Africa/Lagos',day:'numeric',month:'short',year:'numeric'})}</strong></div></div><div className="daily-task-list">{dailyTaskTemplates.map(task=>{const Icon=task.icon;const done=dailyCompleted.includes(task.id);return <article className={'daily-task-card '+(done?'daily-task-done':'')} key={task.id}><span className="daily-task-icon"><Icon size={21}/></span><div className="daily-task-copy"><h3>{task.title}</h3><p>{task.description}</p><b>Reward: {money(task.reward)}</b></div><button className="member-primary" disabled={done} onClick={()=>completeDailyTask(task)}>{done?'Completed ✓':'Mark complete'}</button></article>})}</div><p className="demo-warning">Demo mode: task completion and rewards are saved in this browser only. A secure shared task system requires the platform backend before real rewards can be issued.</p></>}
         {active==='Read & Earn' && <><div className="member-page-intro"><h2>Read. Learn. Earn.</h2><p>Choose an article, read through it and mark it complete to test the demo rewards experience.</p></div><div className="member-search"><Search/><input placeholder="Search articles..." value={search} onChange={e=>setSearch(e.target.value)}/></div><div className="article-grid">{filtered.map(a=><article className="reading-card" key={a.id}><div className="reading-card-top"><span>{a.category}</span><BookOpen/></div><h3>{a.title}</h3><p>{a.excerpt}</p><div className="reading-meta"><span><Clock3 size={15}/>{a.minutes} min read</span><b>{money(a.reward)} reward</b></div><button className="member-primary" disabled={completed.includes(a.id)} onClick={()=>completeArticle(a)}>{completed.includes(a.id)?'Completed ✓':'Mark as read & earn'}</button></article>)}</div>{filtered.length===0&&<div className="member-empty">No articles match your search.</div>}</>}
         {active==='My Referrals' && <><div className="member-page-intro"><h2>Your referral centre</h2><p>Invite people to join ReadEarn and keep track of your referral activity.</p></div><div className="referral-hero"><div><span className="member-kicker">YOUR UNIQUE REFERRAL LINK</span><h3>Share the opportunity to read and grow.</h3><p>Friends can use this link when registration is enabled.</p><div className="referral-copy"><span>{referralLink}</span><button onClick={copyReferral}><Copy size={16}/> Copy link</button></div></div><Gift size={70}/></div><div className="member-stats referral-stats"><article><span className="stat-icon blue"><Users/></span><small>Total referrals</small><strong>0</strong></article><article><span className="stat-icon gold"><BadgeCheck/></span><small>Active referrals</small><strong>0</strong></article><article><span className="stat-icon green"><Coins/></span><small>Referral earnings</small><strong>₦0</strong></article></div><section className="member-panel"><h3>Referral history</h3><div className="member-empty"><Users/><b>No referrals yet</b><span>Your invited members will appear here when referral tracking is connected.</span></div></section></>}
