@@ -258,3 +258,9 @@ body{background:#071a35;color:#f4f7ff}
  .mobile-menu{color:#f4f7ff}
  .nav-login{color:#f4f7ff}
 }
+
+
+/* Ensure the header authentication controls remain above decorative hero layers. */
+.header{position:relative;z-index:20}
+.nav{position:relative;z-index:21}
+.auth-nav-button,.nav .button{position:relative;z-index:22;pointer-events:auto}
