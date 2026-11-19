@@ -23,13 +23,14 @@ function App() {
   const [faqOpen, setFaqOpen] = useState(0);
   const [authMode, setAuthMode] = useState(null);
   const [demoLoggedIn, setDemoLoggedIn] = useState(false);
+  const [demoMember, setDemoMember] = useState({name:'Testing Member',email:'testing@gmail.com'});
 
   const closeMenu = () => setMenuOpen(false);
   const openLogin = (event) => { event?.preventDefault(); event?.stopPropagation(); setMenuOpen(false); setAuthMode('login'); };
   const openRegister = (event) => { event?.preventDefault(); event?.stopPropagation(); setMenuOpen(false); setAuthMode('register'); };
 
-  if (demoLoggedIn) return <MemberDashboard onLogout={()=>setDemoLoggedIn(false)} />;
-  if (authMode === "login" || authMode === "register") return <AuthPage key={authMode} mode={authMode} onMode={setAuthMode} onBack={()=>setAuthMode(null)} onDemoLogin={()=>{setDemoLoggedIn(true);setAuthMode(null);}} />;
+  if (demoLoggedIn) return <MemberDashboard initialMember={demoMember} onLogout={()=>setDemoLoggedIn(false)} />;
+  if (authMode === "login" || authMode === "register") return <AuthPage key={authMode} mode={authMode} onMode={setAuthMode} onBack={()=>setAuthMode(null)} onDemoLogin={(member)=>{setDemoMember(member||{name:'Testing Member',email:'testing@gmail.com'});setDemoLoggedIn(true);setAuthMode(null);}} />;
   return (
     <div className="site-shell">
       <div className="announcement"><Sparkles size={14} /> A smarter way to make your reading time count <span>Explore ReadEarn <ArrowRight size={13} /></span></div>
