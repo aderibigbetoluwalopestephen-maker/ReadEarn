@@ -3,7 +3,7 @@ import {
   BookOpen, LayoutDashboard, Wallet, Users, Gift, Bell, UserRound,
   LogOut, Menu, X, Search, Clock3, CheckCircle2, ArrowUpRight,
   Copy, Coins, TrendingUp, CircleHelp, Settings, ChevronRight,
-  FileText, BadgeCheck, CalendarDays, ShieldCheck, ListChecks, Flame
+  FileText, BadgeCheck, CalendarDays, ShieldCheck, ListChecks, Flame, Dices, Trophy
 } from 'lucide-react';
 
 const starterArticles = [
@@ -13,7 +13,7 @@ const starterArticles = [
   { id: 4, category: 'Money matters', title: 'Simple Habits for Better Money Management', excerpt: 'Understand budgeting basics and build healthier habits around saving and spending.', minutes: 5, reward: 60 }
 ];
 const navItems = [
-  ['Overview', LayoutDashboard], ['Mining & Rewards', Flame], ['Membership', BadgeCheck], ['Daily Tasks', ListChecks], ['Read & Earn', BookOpen], ['My Referrals', Users],
+  ['Overview', LayoutDashboard], ['Mining & Rewards', Flame], ['Spin & Win', Dices], ['Membership', BadgeCheck], ['Daily Tasks', ListChecks], ['Read & Earn', BookOpen], ['My Referrals', Users],
   ['My Wallet', Wallet], ['Withdrawals', ArrowUpRight], ['Notifications', Bell], ['My Profile', UserRound]
 ];
 const money = n => '₦' + Number(n || 0).toLocaleString('en-NG');
@@ -24,6 +24,30 @@ const dailyTaskTemplates = [
   { id: 'check-wallet', title: 'Review your wallet', description: 'Visit your wallet and review your rewards.', reward: 10, icon: Wallet }
 ];
 const lagosDateKey = () => new Intl.DateTimeFormat('en-CA', { timeZone: 'Africa/Lagos', year: 'numeric', month: '2-digit', day: '2-digit' }).format(new Date());
+
+const spinPrizes = [
+  { amount: 10000, weight: 5 },
+  { amount: 5000, weight: 20 },
+  { amount: 1000, weight: 100 },
+  { amount: 500, weight: 1000 },
+  { amount: 200, weight: 4000 },
+  { amount: 100, weight: 8000 },
+  { amount: 50, weight: 12000 },
+  { amount: 35, weight: 14000 },
+  { amount: 15, weight: 18000 },
+  { amount: 10, weight: 20000 },
+  { amount: 5, weight: 22875 }
+];
+const pickSpinPrize = () => {
+  const total = spinPrizes.reduce((sum, prize) => sum + prize.weight, 0);
+  let ticket = Math.random() * total;
+  for (let i = 0; i < spinPrizes.length; i++) {
+    ticket -= spinPrizes[i].weight;
+    if (ticket < 0) return i;
+  }
+  return spinPrizes.length - 1;
+};
+
 const membershipPlans = [
   { id: 'Free', price: 0, mining: 10, login: 5, withdrawal: 'Standard processing', detail: 'Standard daily mining and reading activities.' },
   { id: 'Silver', price: 1500, mining: 25, login: 10, withdrawal: 'Faster processing', detail: 'Higher daily mining rewards and faster withdrawal queue.' },
@@ -53,6 +77,9 @@ export default function MemberDashboard({ onLogout, initialMember }) {
   const loginRewardKey = storageKey('login_reward_' + todayKey);
   const [loginClaimed, setLoginClaimed] = useState(() => localStorage.getItem(loginRewardKey) === 'claimed');
   const [notice, setNotice] = useState('');
+  const [wheelRotation, setWheelRotation] = useState(0);
+  const [spinning, setSpinning] = useState(false);
+  const [spinResult, setSpinResult] = useState(null);
   const [withdrawForm, setWithdrawForm] = useState({ amount: '', bank: '', account: '', name: '' });
   const referralLink = 'https://read-earn.vercel.app/register?ref=TESTING';
 
@@ -78,6 +105,26 @@ export default function MemberDashboard({ onLogout, initialMember }) {
   const formatCountdown = ms => {
     const total = Math.floor(ms / 1000);
     return [Math.floor(total / 3600), Math.floor((total % 3600) / 60), total % 60].map(n => String(n).padStart(2, '0')).join(':');
+  };
+  const startSpin = () => {
+    if (spinning) return;
+    setSpinResult(null);
+    const prizeIndex = pickSpinPrize();
+    const sector = 360 / spinPrizes.length;
+    const targetRotation = 360 * 7 + (360 - ((prizeIndex + 0.5) * sector));
+    setSpinning(true);
+    setWheelRotation(prev => prev + targetRotation);
+  };
+  const finishSpin = () => {
+    if (!spinning || spinResult !== null) return;
+    const normalized = ((wheelRotation % 360) + 360) % 360;
+    const sector = 360 / spinPrizes.length;
+    const prizeIndex = Math.round(((360 - normalized) % 360) / sector - 0.5 + spinPrizes.length) % spinPrizes.length;
+    const prize = spinPrizes[prizeIndex];
+    setSpinResult(prize.amount);
+    setSpinning(false);
+    setBalance(prev => prev + prize.amount);
+    toast('Congratulations! You won ' + money(prize.amount) + ' in the demo spin.');
   };
   const claimLoginReward = () => {
     if (loginClaimed) return toast('You have already claimed today’s login reward.');
@@ -153,6 +200,7 @@ export default function MemberDashboard({ onLogout, initialMember }) {
           <section className="member-panel"><div className="member-panel-heading"><div><h3>Recent activity</h3><p>Your latest reading and wallet activity</p></div></div>{completed.length===0?<div className="member-empty"><Clock3/><b>No activity yet</b><span>Complete your first reading activity to see it here.</span></div>:completed.slice(-4).reverse().map(id=>{const a=starterArticles.find(x=>x.id===id);return a&&<div className="activity-row" key={id}><CheckCircle2/><div><b>{a.title}</b><small>Reading reward · Completed</small></div><strong>+{money(a.reward)}</strong></div>})}</section>
         </>}
         {active==='Mining & Rewards' && <><div className="member-page-intro"><h2>Your daily mining</h2><p>Your mining session runs for 24 hours, including when you are logged out. Return when the countdown ends to claim your reward and start another session.</p></div><div className="mining-hero"><div className="mining-hero-icon"><Flame size={27}/></div><span className="member-kicker">{currentPlan.id.toUpperCase()} MEMBERSHIP MINING</span><strong>{money(currentPlan.mining)}</strong><small>Preview reward per completed 24-hour session</small><div className="mining-countdown">{miningReady ? '24:00:00' : formatCountdown(miningRemaining)}</div><p>{miningReady ? 'Your mining reward is ready.' : 'Time until your next mining reward can be claimed'}</p><div className="daily-progress-track"><span style={{width:Math.min(100,((24*60*60*1000-miningRemaining)/(24*60*60*1000))*100)+'%'}}/></div><button className="member-primary" disabled={!miningReady} onClick={claimMiningReward}>{miningReady ? 'Claim mining reward & start next session' : 'Mining in progress'}</button></div><div className="daily-summary"><div><small>MINING RATE</small><strong>{money(currentPlan.mining)} / 24h</strong></div><div><small>DAILY LOGIN REWARD</small><strong>{money(currentPlan.login)}</strong></div><div><small>WITHDRAWAL BENEFIT</small><strong>{currentPlan.withdrawal}</strong></div></div><section className="member-panel"><h3>How mining works</h3><div className="activity-row"><CheckCircle2/><div><b>Automatic session start</b><small>Your first 24-hour session starts when you open your member dashboard.</small></div></div><div className="activity-row"><Clock3/><div><b>24-hour countdown</b><small>The timer is based on the saved start and end time, so it continues while you are offline.</small></div></div><div className="activity-row"><Coins/><div><b>Claim when complete</b><small>After 24 hours, claim the displayed reward to start your next mining session.</small></div></div></section><p className="demo-warning">Important: this is a local browser demonstration, not cryptocurrency mining or guaranteed income. Real mining schedules, balances and reward claims must be verified by a secure server before launch.</p></>}
+        {active==='Spin & Win' && <><div className="member-page-intro"><h2>Spin the wheel. Win rewards.</h2><p>Try your luck for a chance to win one of the cash prizes. The three biggest prizes are intentionally very rare.</p></div><div className="spin-layout"><section className="member-panel spin-panel"><div className="spin-wheel-wrap"><div className="spin-pointer" aria-hidden="true"/><div className="spin-wheel" style={{transform:'rotate('+wheelRotation+'deg)'}} onTransitionEnd={finishSpin}>{spinPrizes.map((prize,index)=><span className="spin-wheel-label" key={prize.amount} style={{'--spin-index':index}}>{money(prize.amount)}</span>)}<div className="spin-wheel-center"><Dices size={25}/><b>SPIN</b></div></div></div><button className="member-primary spin-button" disabled={spinning} onClick={startSpin}>{spinning?'Spinning...':'SPIN & WIN'}</button>{spinResult!==null&&<div className="spin-result"><Trophy size={22}/><div><b>You won {money(spinResult)}!</b><small>Your demo wallet has been updated.</small></div></div>}<p className="demo-warning">Prize probabilities are weighted: ₦10,000, ₦5,000 and ₦1,000 are extremely rare. This is a local demo; rewards are not real money and can be changed in the browser.</p></section><section className="member-panel spin-prize-panel"><h3>Available prizes</h3><p>Every spin lands on one of these prizes.</p><div className="spin-prize-list">{spinPrizes.map(prize=><div key={prize.amount}><span>{money(prize.amount)}</span>{prize.amount>=1000&&<small>Jackpot</small>}</div>)}</div><div className="spin-odds-note"><Trophy size={17}/><span>Jackpot prizes have much lower odds than the smaller rewards.</span></div></section></div></>}
         {active==='Membership' && <><div className="member-page-intro"><h2>Choose your membership</h2><p>Higher plans show higher preview reward rates and faster withdrawal priority. Paid upgrades will only activate after a verified payment is connected.</p></div><div className="membership-grid">{membershipPlans.map(plan=><article className={'membership-card '+(membership===plan.id?'membership-current':'')} key={plan.id}><span className="membership-plan-name">{plan.id}</span><strong>{plan.price===0?'Free':money(plan.price)+'/month'}</strong><p>{plan.detail}</p><div><span>Mining every 24 hours</span><b>{money(plan.mining)}</b></div><div><span>Daily login reward</span><b>{money(plan.login)}</b></div><div><span>Withdrawals</span><b>{plan.withdrawal}</b></div><button className="member-primary" disabled={membership===plan.id} onClick={()=>previewMembership(plan)}>{membership===plan.id?'Current plan':plan.price===0?'Select Free':'Payment coming soon'}</button></article>)}</div><p className="demo-warning">Plan prices and reward rates are proposed preview values, not an active offer. Selecting a paid plan will not charge you or upgrade your account until payment verification is implemented.</p></>}
         {active==='Daily Tasks' && <><div className="member-page-intro"><h2>Your daily tasks</h2><p>Complete today's activities to collect extra demo rewards. Your checklist refreshes every day at midnight in Nigeria time.</p></div><div className="daily-summary"><div><small>DAILY PROGRESS</small><strong>{dailyCompleted.length} / {dailyTaskTemplates.length}</strong></div><div><small>REWARDS EARNED TODAY</small><strong>{money(dailyTaskTemplates.filter(t=>dailyCompleted.includes(t.id)).reduce((sum,t)=>sum+t.reward,0))}</strong></div><div><small>DATE (NIGERIA)</small><strong>{new Date().toLocaleDateString('en-NG',{timeZone:'Africa/Lagos',day:'numeric',month:'short',year:'numeric'})}</strong></div></div><div className="daily-task-list">{dailyTaskTemplates.map(task=>{const Icon=task.icon;const done=dailyCompleted.includes(task.id);return <article className={'daily-task-card '+(done?'daily-task-done':'')} key={task.id}><span className="daily-task-icon"><Icon size={21}/></span><div className="daily-task-copy"><h3>{task.title}</h3><p>{task.description}</p><b>Reward: {money(task.reward)}</b></div><button className="member-primary" disabled={done} onClick={()=>completeDailyTask(task)}>{done?'Completed ✓':'Mark complete'}</button></article>})}</div><p className="demo-warning">Demo mode: task completion and rewards are saved in this browser only. A secure shared task system requires the platform backend before real rewards can be issued.</p></>}
         {active==='Read & Earn' && <><div className="member-page-intro"><h2>Read. Learn. Earn.</h2><p>Choose an article, read through it and mark it complete to test the demo rewards experience.</p></div><div className="member-search"><Search/><input placeholder="Search articles..." value={search} onChange={e=>setSearch(e.target.value)}/></div><div className="article-grid">{filtered.map(a=><article className="reading-card" key={a.id}><div className="reading-card-top"><span>{a.category}</span><BookOpen/></div><h3>{a.title}</h3><p>{a.excerpt}</p><div className="reading-meta"><span><Clock3 size={15}/>{a.minutes} min read</span><b>{money(a.reward)} reward</b></div><button className="member-primary" disabled={completed.includes(a.id)} onClick={()=>completeArticle(a)}>{completed.includes(a.id)?'Completed ✓':'Mark as read & earn'}</button></article>)}</div>{filtered.length===0&&<div className="member-empty">No articles match your search.</div>}</>}
