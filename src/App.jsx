@@ -21,12 +21,14 @@ function App() {
   const [menuOpen, setMenuOpen] = useState(false);
   const [faqOpen, setFaqOpen] = useState(0);
   const [authMode, setAuthMode] = useState(null);
+  const [demoLoggedIn, setDemoLoggedIn] = useState(false);
 
   const closeMenu = () => setMenuOpen(false);
   const openLogin = (event) => { event?.preventDefault(); event?.stopPropagation(); setMenuOpen(false); setAuthMode('login'); };
   const openRegister = (event) => { event?.preventDefault(); event?.stopPropagation(); setMenuOpen(false); setAuthMode('register'); };
 
-  if (authMode === "login" || authMode === "register") return <AuthPage key={authMode} mode={authMode} onMode={setAuthMode} onBack={()=>setAuthMode(null)} />;
+  if (demoLoggedIn) return <div className="site-shell"><header className="header"><a className="brand" href="#home"><span className="brand-mark"><BookOpen size={22}/></span><span>Read<span className="brand-gold">Earn</span><small>READ. LEARN. GROW.</small></span></a><button className="button button-small" onClick={()=>setDemoLoggedIn(false)}>Log out</button></header><main className="section-wrap" style={{minHeight:'70vh',paddingTop:'64px'}}><div className="eyebrow">MEMBER AREA</div><h1>Welcome to ReadEarn, testing!</h1><p>Your demo login is successful. This is a temporary preview dashboard; rewards, referrals and account data will be connected when the backend is ready.</p><div className="benefit-grid" style={{marginTop:'32px'}}><article className="benefit-card"><h3>Reading activity</h3><p>Your reading activities will appear here.</p></article><article className="benefit-card"><h3>My rewards</h3><p>Your eligible rewards will appear here.</p></article><article className="benefit-card"><h3>Referrals</h3><p>Your referral activity will appear here.</p></article></div></main></div>;
+  if (authMode === "login" || authMode === "register") return <AuthPage key={authMode} mode={authMode} onMode={setAuthMode} onBack={()=>setAuthMode(null)} onDemoLogin={()=>{setDemoLoggedIn(true);setAuthMode(null);}} />;
   return (
     <div className="site-shell">
       <div className="announcement"><Sparkles size={14} /> A smarter way to make your reading time count <span>Explore ReadEarn <ArrowRight size={13} /></span></div>
