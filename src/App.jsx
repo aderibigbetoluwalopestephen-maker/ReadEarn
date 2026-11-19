@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import AuthPage from './AuthPage.jsx';
 import {
   ArrowRight, BookOpen, Check, ChevronDown, Coins, Gift, Menu,
   ShieldCheck, Sparkles, Users, Wallet, X, Zap
@@ -19,9 +20,11 @@ const steps = [
 function App() {
   const [menuOpen, setMenuOpen] = useState(false);
   const [faqOpen, setFaqOpen] = useState(0);
+  const [authMode, setAuthMode] = useState(null);
 
   const closeMenu = () => setMenuOpen(false);
 
+  if (authMode) return <AuthPage mode={authMode} onMode={setAuthMode} onBack={()=>setAuthMode(null)} />;
   return (
     <div className="site-shell">
       <div className="announcement"><Sparkles size={14} /> A smarter way to make your reading time count <span>Explore ReadEarn <ArrowRight size={13} /></span></div>
@@ -35,8 +38,8 @@ function App() {
           <a href="#how" onClick={closeMenu}>How it works</a>
           <a href="#benefits" onClick={closeMenu}>Why ReadEarn</a>
           <a href="#faq" onClick={closeMenu}>FAQs</a>
-          <a className="nav-login" href="#get-started" onClick={closeMenu}>Log in</a>
-          <a className="button button-small" href="#get-started" onClick={closeMenu}>Create account <ArrowRight size={16} /></a>
+          <a className="nav-login" href="#login" onClick={(e)=>{e.preventDefault();closeMenu();setAuthMode("login")}}>Log in</a>
+          <a className="button button-small" href="#register" onClick={(e)=>{e.preventDefault();closeMenu();setAuthMode("register")}}>Create account <ArrowRight size={16} /></a>
         </nav>
       </header>
 
@@ -47,7 +50,7 @@ function App() {
             <h1>Make every page<br /> <em>count.</em></h1>
             <p className="hero-text">Read interesting content, take part in activities and keep track of your rewards — all in one simple place.</p>
             <div className="hero-actions">
-              <a className="button" href="#get-started">Get started for free <ArrowRight size={18} /></a>
+              <a className="button" href="#register" onClick={(e)=>{e.preventDefault();setAuthMode("register")}}>Get started for free <ArrowRight size={18} /></a>
               <a className="text-link" href="#how">See how it works <span>↗</span></a>
             </div>
             <div className="hero-trust"><span className="trust-icons"><i><BookOpen size={14}/></i><i><ShieldCheck size={14}/></i><i><Users size={14}/></i></span><span>A community built around reading and growth</span></div>
@@ -86,7 +89,7 @@ function App() {
           ['Can I withdraw my rewards?', 'Withdrawal options, minimum amounts and processing conditions will be displayed in your account once the wallet and payment features are enabled.']
         ].map(([q,a],i)=><div className={'faq-item '+(faqOpen===i?'faq-active':'')} key={q}><button onClick={()=>setFaqOpen(faqOpen===i?-1:i)}><span>{q}</span><ChevronDown size={19}/></button>{faqOpen===i&&<p>{a}</p>}</div>)}</div></section>
 
-        <section className="cta-section section-wrap" id="get-started"><div className="cta-card"><div className="cta-decoration">✦</div><div className="eyebrow centered">YOUR NEXT CHAPTER STARTS NOW</div><h2>Ready to make your<br/><em>reading count?</em></h2><p>Create your free account and be part of the ReadEarn community.</p><a className="button" href="mailto:hello@readearn.com?subject=ReadEarn%20early%20access">Get started <ArrowRight size={17}/></a><small>Registration and member dashboard are coming online next.</small></div></section>
+        <section className="cta-section section-wrap" id="get-started"><div className="cta-card"><div className="cta-decoration">✦</div><div className="eyebrow centered">YOUR NEXT CHAPTER STARTS NOW</div><h2>Ready to make your<br/><em>reading count?</em></h2><p>Create your free account and be part of the ReadEarn community.</p><a className="button" href="#register" onClick={(e)=>{e.preventDefault();setAuthMode("register")}}>Get started <ArrowRight size={17}/></a><small>Registration and member dashboard are coming online next.</small></div></section>
       </main>
 
       <footer className="footer"><div className="section-wrap footer-inner"><a className="brand footer-brand" href="#home"><span className="brand-mark"><BookOpen size={21}/></span><span>Read<span className="brand-gold">Earn</span><small>READ. LEARN. GROW.</small></span></a><p>Make every page count.</p><div className="footer-bottom"><span>© {new Date().getFullYear()} ReadEarn. All rights reserved.</span><span>Built for readers, learners and curious minds.</span></div></div></footer>
